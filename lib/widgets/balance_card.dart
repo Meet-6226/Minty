@@ -33,20 +33,24 @@ class BalanceCard extends StatelessWidget {
           ),
         ],
       ),
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                'TOTAL AVAILABLE BALANCE',
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: 1.0,
-                  color: AppColors.textSecondary,
+              Flexible(
+                child: Text(
+                  'TOTAL AVAILABLE BALANCE',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 1.0,
+                    color: AppColors.textSecondary,
+                  ),
                 ),
               ),
               Container(
@@ -80,17 +84,21 @@ class BalanceCard extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 10),
-          Text(
-            totalBalance,
-            style: GoogleFonts.plusJakartaSans(
-              fontSize: 34,
-              fontWeight: FontWeight.w800,
-              letterSpacing: -1.2,
-              color: AppColors.textPrimary,
+          const SizedBox(height: 8),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text(
+              totalBalance,
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: 32,
+                fontWeight: FontWeight.w800,
+                letterSpacing: -1.0,
+                color: AppColors.textPrimary,
+              ),
             ),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 16),
           Row(
             children: [
               MetricCard(
@@ -98,13 +106,13 @@ class BalanceCard extends StatelessWidget {
                 amount: income,
                 type: MetricType.income,
               ),
-              const SizedBox(width: 10),
+              const SizedBox(width: 8),
               MetricCard(
                 title: 'Spent',
                 amount: spent,
                 type: MetricType.spent,
               ),
-              const SizedBox(width: 10),
+              const SizedBox(width: 8),
               MetricCard(
                 title: 'Saved',
                 amount: saved,

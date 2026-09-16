@@ -34,7 +34,19 @@ class AppColors {
   static const Color purpleLight = Color(0xFFF3E8FF);
   static const Color purpleAccent = Color(0xFF8B5CF6);
 
+  // Dark Mode Palette (Dark Navy, lighter dark surfaces, mint accents)
+  static const Color darkBackground = Color(0xFF0B1120);       // Deep navy background
+  static const Color darkCardSurface = Color(0xFF162032);      // Dark slate navy surface
+  static const Color darkCardSurfaceSecondary = Color(0xFF1F2D44); // Slightly elevated dark card
+  static const Color darkCardBorder = Color(0xFF26354D);       // Dark subtle border
+  static const Color darkTextPrimary = Color(0xFFF1F5F9);      // Off-white / bright slate
+  static const Color darkTextSecondary = Color(0xFF94A3B8);    // Muted slate text
+  static const Color darkTextTertiary = Color(0xFF64748B);     // Dim muted slate
+  static const Color darkMintLight = Color(0xFF064E3B);        // Deep mint tint for dark mode
+  static const Color darkIndigoLight = Color(0xFF1E1B4B);      // Deep indigo tint for dark mode
+
   // Shadows
   static const Color shadowColor = Color(0x0F172033);
   static const Color shadowMedium = Color(0x1A172033);
 }
+

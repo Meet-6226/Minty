@@ -65,7 +65,7 @@ class QuickActionButton extends StatelessWidget {
               boxShadow: type == QuickActionType.pay
                   ? [
                       BoxShadow(
-                        color: AppColors.mintPrimary.withOpacity(0.32),
+                        color: AppColors.mintPrimary.withValues(alpha: 0.32),
                         blurRadius: 14,
                         offset: const Offset(0, 4),
                       ),
@@ -86,7 +86,7 @@ class QuickActionButton extends StatelessWidget {
                   height: 40,
                   decoration: BoxDecoration(
                     color: type == QuickActionType.pay
-                        ? Colors.white.withOpacity(0.2)
+                        ? Colors.white.withValues(alpha: 0.2)
                         : (type == QuickActionType.expense
                             ? const Color(0xFFFFF1F2)
                             : AppColors.mintLight),
@@ -99,16 +99,18 @@ class QuickActionButton extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 8),
-                Text(
-                  label,
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 13,
-                    fontWeight: FontWeight.w600,
-                    color: textColor,
-                    letterSpacing: -0.2,
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    label,
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: textColor,
+                      letterSpacing: -0.2,
+                    ),
+                    maxLines: 1,
                   ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
                 ),
               ],
             ),

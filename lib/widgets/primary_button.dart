@@ -34,7 +34,7 @@ class PrimaryButton extends StatelessWidget {
         style: ElevatedButton.styleFrom(
           backgroundColor: backgroundColor ?? AppColors.mintPrimary,
           foregroundColor: textColor ?? AppColors.textInverse,
-          disabledBackgroundColor: AppColors.mintPrimary.withOpacity(0.6),
+          disabledBackgroundColor: AppColors.mintPrimary.withValues(alpha: 0.6),
           elevation: 0,
           shadowColor: Colors.transparent,
           shape: RoundedRectangleBorder(

@@ -9,6 +9,7 @@ class SavingsGoalCard extends StatelessWidget {
   final double progress; // 0.0 to 1.0 (e.g. 0.68)
   final String remainingAmount;
   final IconData icon;
+  final VoidCallback? onTap;
 
   const SavingsGoalCard({
     super.key,
@@ -18,28 +19,34 @@ class SavingsGoalCard extends StatelessWidget {
     this.progress = 0.68,
     this.remainingAmount = '₹27,000 to go',
     this.icon = Icons.laptop_mac_rounded,
+    this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
     final percentage = (progress * 100).toInt();
 
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        color: AppColors.cardSurface,
+    return Material(
+      color: AppColors.cardSurface,
+      borderRadius: BorderRadius.circular(20),
+      child: InkWell(
+        onTap: onTap,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppColors.cardBorder, width: 1),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x06172033),
-            blurRadius: 16,
-            offset: Offset(0, 4),
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(18),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: AppColors.cardBorder, width: 1),
+            boxShadow: const [
+              BoxShadow(
+                color: Color(0x06172033),
+                blurRadius: 16,
+                offset: Offset(0, 4),
+              ),
+            ],
           ),
-        ],
-      ),
-      child: Column(
+          child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
@@ -64,6 +71,8 @@ class SavingsGoalCard extends StatelessWidget {
                   children: [
                     Text(
                       title,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 15,
                         fontWeight: FontWeight.w700,
@@ -73,6 +82,8 @@ class SavingsGoalCard extends StatelessWidget {
                     const SizedBox(height: 2),
                     Text(
                       '$currentAmount of $targetAmount',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       style: GoogleFonts.plusJakartaSans(
                         fontSize: 13,
                         fontWeight: FontWeight.w500,
@@ -82,6 +93,7 @@ class SavingsGoalCard extends StatelessWidget {
                   ],
                 ),
               ),
+              const SizedBox(width: 8),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
@@ -140,18 +152,26 @@ class SavingsGoalCard extends StatelessWidget {
                   color: AppColors.textTertiary,
                 ),
               ),
-              Text(
-                remainingAmount,
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.indigoSecondary,
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  remainingAmount,
+                  textAlign: TextAlign.end,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: GoogleFonts.plusJakartaSans(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.indigoSecondary,
+                  ),
                 ),
               ),
             ],
           ),
         ],
       ),
-    );
+    ),
+  ),
+);
   }
 }

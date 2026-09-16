@@ -155,6 +155,52 @@ void main() {
       await tester.pump(const Duration(milliseconds: 100));
     });
 
+    testWidgets('PayScreen updates breakdown when typing 201 then 2011',
+        (tester) async {
+      tester.view.physicalSize = const Size(800, 1600);
+      tester.view.devicePixelRatio = 2.0;
+      addTearDown(() => tester.view.resetPhysicalSize());
+
+      final contacts = await db.getAllContacts();
+
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            databaseProvider.overrideWithValue(db),
+          ],
+          child: MaterialApp(
+            theme: AppTheme.lightTheme,
+            home: PayScreen(initialContact: contacts.first),
+          ),
+        ),
+      );
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
+
+      final amountField = find.ancestor(
+        of: find.text('0.00'),
+        matching: find.byType(TextFormField),
+      );
+      expect(amountField, findsOneWidget);
+
+      // Enter 201
+      await tester.enterText(amountField, '201');
+      await tester.pump();
+      expect(find.text('₹201.00'), findsOneWidget);
+      expect(find.text('+₹9.00'), findsOneWidget);
+      expect(find.text('₹210.00'), findsOneWidget);
+
+      // Now enter 2011 (round-off remains 9.0, but actual payment must update to 2011.00)
+      await tester.enterText(amountField, '2011');
+      await tester.pump();
+      expect(find.text('₹2,011.00'), findsOneWidget);
+      expect(find.text('+₹9.00'), findsOneWidget);
+      expect(find.text('₹2,020.00'), findsOneWidget);
+
+      await tester.pumpWidget(const SizedBox());
+      await tester.pump(const Duration(milliseconds: 100));
+    });
+
     testWidgets('RoundOffWalletScreen displays total balance and history',
         (tester) async {
       tester.view.physicalSize = const Size(800, 1600);
@@ -179,6 +225,12 @@ void main() {
       expect(find.text('TOTAL SAVED VIA ROUND-OFF'), findsOneWidget);
       expect(find.text('Round-Off History'), findsOneWidget);
       expect(find.text('Starbucks Coffee'), findsOneWidget);
+
+      // Tap back button
+      final backButton = find.byIcon(Icons.arrow_back_ios_new_rounded);
+      expect(backButton, findsOneWidget);
+      await tester.tap(backButton);
+      await tester.pumpAndSettle();
 
       await tester.pumpWidget(const SizedBox());
       await tester.pump(const Duration(milliseconds: 100));

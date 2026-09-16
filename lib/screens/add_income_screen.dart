@@ -338,8 +338,11 @@ class _AddIncomeScreenState extends ConsumerState<AddIncomeScreen> {
                 const SizedBox(height: 10),
                 accountsAsync.when(
                   data: (accounts) {
-                    if (_selectedAccount == null && accounts.isNotEmpty) {
+                    if (accounts.isEmpty) return const SizedBox.shrink();
+                    if (_selectedAccount == null || !accounts.any((a) => a.id == _selectedAccount!.id)) {
                       _selectedAccount = accounts.first;
+                    } else {
+                      _selectedAccount = accounts.firstWhere((a) => a.id == _selectedAccount!.id);
                     }
                     return Container(
                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),

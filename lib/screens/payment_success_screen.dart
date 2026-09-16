@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import '../data/database/app_database.dart';
 import '../theme/app_colors.dart';
 import '../widgets/primary_button.dart';
+import 'home_screen.dart';
 import 'round_off_wallet_screen.dart';
 
 class PaymentSuccessScreen extends StatelessWidget {
@@ -254,14 +255,21 @@ class PaymentSuccessScreen extends StatelessWidget {
                   PrimaryButton(
                     text: 'Done',
                     onPressed: () {
-                      Navigator.pop(context);
+                      if (Navigator.canPop(context)) {
+                        Navigator.pop(context);
+                      } else {
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(builder: (_) => const HomeScreen()),
+                        );
+                      }
                     },
                   ),
                   const SizedBox(height: 12),
                   if (roundOffAmount > 0)
                     TextButton(
                       onPressed: () {
-                        Navigator.pushReplacement(
+                        Navigator.push(
                           context,
                           MaterialPageRoute(
                             builder: (_) => const RoundOffWalletScreen(),

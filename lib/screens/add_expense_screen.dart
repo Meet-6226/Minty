@@ -46,23 +46,16 @@ class _AddExpenseScreenState extends ConsumerState<AddExpenseScreen> {
   void _updateRoundOffCalculation() {
     final text = _amountController.text.trim();
     if (text.isEmpty) {
-      if (_calculatedRoundOff != 0.0) {
-        setState(() => _calculatedRoundOff = 0.0);
-      }
+      setState(() => _calculatedRoundOff = 0.0);
       return;
     }
     final amount = double.tryParse(text);
     if (amount != null && amount > 0) {
-      // Round up to nearest ₹10 or ₹50 or ₹100
-      final remainder = amount % 10;
-      final roundOff = remainder > 0 ? (10 - remainder) : 0.0;
-      if (_calculatedRoundOff != roundOff) {
-        setState(() => _calculatedRoundOff = roundOff);
-      }
+      final remainder = (amount * 100).round() % 1000;
+      final roundOffCents = remainder > 0 ? (1000 - remainder) : 0;
+      setState(() => _calculatedRoundOff = roundOffCents / 100.0);
     } else {
-      if (_calculatedRoundOff != 0.0) {
-        setState(() => _calculatedRoundOff = 0.0);
-      }
+      setState(() => _calculatedRoundOff = 0.0);
     }
   }
 
@@ -405,8 +398,11 @@ class _AddExpenseScreenState extends ConsumerState<AddExpenseScreen> {
                 const SizedBox(height: 10),
                 accountsAsync.when(
                   data: (accounts) {
-                    if (_selectedAccount == null && accounts.isNotEmpty) {
+                    if (accounts.isEmpty) return const SizedBox.shrink();
+                    if (_selectedAccount == null || !accounts.any((a) => a.id == _selectedAccount!.id)) {
                       _selectedAccount = accounts.first;
+                    } else {
+                      _selectedAccount = accounts.firstWhere((a) => a.id == _selectedAccount!.id);
                     }
                     return Container(
                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),

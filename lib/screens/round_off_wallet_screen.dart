@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import '../providers/database_providers.dart';
 import '../theme/app_colors.dart';
 import '../utils/icon_helper.dart';
+import 'home_screen.dart';
 import 'transaction_details_screen.dart';
 
 class RoundOffWalletScreen extends ConsumerWidget {
@@ -33,7 +34,16 @@ class RoundOffWalletScreen extends ConsumerWidget {
         ),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 20),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () {
+            if (Navigator.canPop(context)) {
+              Navigator.pop(context);
+            } else {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (_) => const HomeScreen()),
+              );
+            }
+          },
         ),
       ),
       body: SafeArea(

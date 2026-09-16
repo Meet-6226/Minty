@@ -28,7 +28,7 @@ class _PayScreenState extends ConsumerState<PayScreen> {
   final _formKey = GlobalKey<FormState>();
 
   Contact? _selectedContact;
-  Account? _selectedAccount;
+  int? _selectedAccountId;
   bool _enableRoundOff = true;
   double _calculatedRoundOff = 0.0;
   bool _isProcessing = false;
@@ -52,22 +52,16 @@ class _PayScreenState extends ConsumerState<PayScreen> {
   void _updateRoundOff() {
     final text = _amountController.text.trim();
     if (text.isEmpty) {
-      if (_calculatedRoundOff != 0.0) {
-        setState(() => _calculatedRoundOff = 0.0);
-      }
+      setState(() => _calculatedRoundOff = 0.0);
       return;
     }
     final amount = double.tryParse(text);
     if (amount != null && amount > 0) {
-      final remainder = amount % 10;
-      final roundOff = remainder > 0 ? (10 - remainder) : 0.0;
-      if (_calculatedRoundOff != roundOff) {
-        setState(() => _calculatedRoundOff = roundOff);
-      }
+      final remainder = (amount * 100).round() % 1000;
+      final roundOffCents = remainder > 0 ? (1000 - remainder) : 0;
+      setState(() => _calculatedRoundOff = roundOffCents / 100.0);
     } else {
-      if (_calculatedRoundOff != 0.0) {
-        setState(() => _calculatedRoundOff = 0.0);
-      }
+      setState(() => _calculatedRoundOff = 0.0);
     }
   }
 
@@ -111,7 +105,8 @@ class _PayScreenState extends ConsumerState<PayScreen> {
       return;
     }
 
-    if (_selectedAccount == null) {
+    final accounts = await ref.read(databaseProvider).getAllAccounts();
+    if (accounts.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Please select a payment account'),
@@ -122,14 +117,19 @@ class _PayScreenState extends ConsumerState<PayScreen> {
       return;
     }
 
+    final selectedAccount = accounts.firstWhere(
+      (a) => a.id == _selectedAccountId,
+      orElse: () => accounts.first,
+    );
+
     final roundOff = _enableRoundOff ? _calculatedRoundOff : 0.0;
     final totalPayment = amount + roundOff;
 
-    if (_selectedAccount!.balance < totalPayment) {
+    if (selectedAccount.balance < totalPayment) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'Insufficient balance in ${_selectedAccount!.name}. Required: ₹${NumberFormat('#,##0.00').format(totalPayment)}, Available: ₹${NumberFormat('#,##0.00').format(_selectedAccount!.balance)}',
+            'Insufficient balance in ${selectedAccount.name}. Required: ₹${NumberFormat('#,##0.00').format(totalPayment)}, Available: ₹${NumberFormat('#,##0.00').format(selectedAccount.balance)}',
           ),
           backgroundColor: AppColors.error,
           behavior: SnackBarBehavior.floating,
@@ -142,7 +142,7 @@ class _PayScreenState extends ConsumerState<PayScreen> {
     // Show Confirmation Sheet
     _showReviewPaymentSheet(
       contact: _selectedContact!,
-      account: _selectedAccount!,
+      account: selectedAccount,
       amount: amount,
       roundOff: roundOff,
       total: totalPayment,
@@ -333,10 +333,11 @@ class _PayScreenState extends ConsumerState<PayScreen> {
       );
 
       if (!mounted) return;
+      _clearSelectedContact();
       setState(() => _isProcessing = false);
 
       // Navigate to Payment Success Screen
-      Navigator.pushReplacement(
+      Navigator.push(
         context,
         MaterialPageRoute(
           builder: (_) => PaymentSuccessScreen(
@@ -639,8 +640,10 @@ class _PayScreenState extends ConsumerState<PayScreen> {
                     const SizedBox(height: 10),
                     accountsAsync.when(
                       data: (accounts) {
-                        if (_selectedAccount == null && accounts.isNotEmpty) {
-                          _selectedAccount = accounts.first;
+                        if (accounts.isEmpty) return const SizedBox.shrink();
+                        if (_selectedAccountId == null ||
+                            !accounts.any((a) => a.id == _selectedAccountId)) {
+                          _selectedAccountId = accounts.first.id;
                         }
                         return Container(
                           padding: const EdgeInsets.symmetric(
@@ -652,15 +655,15 @@ class _PayScreenState extends ConsumerState<PayScreen> {
                                 color: AppColors.cardBorder, width: 1),
                           ),
                           child: DropdownButtonHideUnderline(
-                            child: DropdownButton<Account>(
+                            child: DropdownButton<int>(
                               isExpanded: true,
-                              value: _selectedAccount,
+                              value: _selectedAccountId,
                               icon: const Icon(
                                   Icons.keyboard_arrow_down_rounded,
                                   color: AppColors.textSecondary),
                               items: accounts.map((account) {
-                                return DropdownMenuItem<Account>(
-                                  value: account,
+                                return DropdownMenuItem<int>(
+                                  value: account.id,
                                   child: Row(
                                     children: [
                                       Icon(
@@ -693,10 +696,10 @@ class _PayScreenState extends ConsumerState<PayScreen> {
                                   ),
                                 );
                               }).toList(),
-                              onChanged: (account) {
-                                if (account != null) {
+                              onChanged: (accountId) {
+                                if (accountId != null) {
                                   setState(
-                                      () => _selectedAccount = account);
+                                      () => _selectedAccountId = accountId);
                                 }
                               },
                             ),

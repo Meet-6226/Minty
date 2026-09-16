@@ -69,10 +69,10 @@ void main() {
 
     test('Round-Off Wallet balance is calculated dynamically via SUM(roundOffAmount)',
         () async {
-      // Seeded transactions:
-      // Starbucks (20) + Blinkit (15) + Swiggy (20) + Uber (8) + Cult.fit (1) + Jio (1) + Zara (10) + BookMyShow (40) = 115.0
+      // Seeded transactions (nearest ₹10 round-up rule):
+      // Starbucks (5) + Blinkit (5) + Swiggy (8) + Uber (8) + Cult.fit (1) + Jio (9) + Zara (6) + BookMyShow (5) = 47.0
       final roundOffBalance = await db.watchRoundOffWalletBalance().first;
-      expect(roundOffBalance, 115.0);
+      expect(roundOffBalance, 47.0);
 
       // Add another transaction with round-off: Payment = ₹990, round-off = ₹10
       final accounts = await db.getAllAccounts();
@@ -90,7 +90,7 @@ void main() {
 
       final updatedRoundOffBalance =
           await db.watchRoundOffWalletBalance().first;
-      expect(updatedRoundOffBalance, 125.0); // 115 + 10 = 125.0
+      expect(updatedRoundOffBalance, 57.0); // 47 + 10 = 57.0
     });
 
     test('Adding Expense correctly updates Account balance', () async {

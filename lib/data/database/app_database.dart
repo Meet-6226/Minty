@@ -116,6 +116,60 @@ class AppDatabase extends _$AppDatabase {
       beforeOpen: (details) async {
         // Enable foreign keys
         await customStatement('PRAGMA foreign_keys = ON');
+
+        // Normalize any seeded or existing transactions so they strictly follow the nearest ₹10 round-up rule
+        final allTxs = await select(transactions).get();
+        for (final tx in allTxs) {
+          if (tx.roundOffAmount > 0) {
+            if (tx.description == 'Starbucks Coffee' && tx.amount == 280.0) {
+              await (update(transactions)..where((t) => t.id.equals(tx.id))).write(
+                const TransactionsCompanion(
+                  amount: Value(275.0),
+                  roundOffAmount: Value(5.0),
+                ),
+              );
+            } else if (tx.description == 'Swiggy Gourmet Dinner' && tx.amount == 580.0) {
+              await (update(transactions)..where((t) => t.id.equals(tx.id))).write(
+                const TransactionsCompanion(
+                  amount: Value(582.0),
+                  roundOffAmount: Value(8.0),
+                ),
+              );
+            } else if (tx.description == 'Zara Weekend Shopping' && tx.amount == 2190.0) {
+              await (update(transactions)..where((t) => t.id.equals(tx.id))).write(
+                const TransactionsCompanion(
+                  amount: Value(2194.0),
+                  roundOffAmount: Value(6.0),
+                ),
+              );
+            } else if (tx.description == 'BookMyShow IMAX Tickets' && tx.amount == 760.0) {
+              await (update(transactions)..where((t) => t.id.equals(tx.id))).write(
+                const TransactionsCompanion(
+                  amount: Value(765.0),
+                  roundOffAmount: Value(5.0),
+                ),
+              );
+            } else if (tx.description == 'Jio Fiber Broadband Bill' && tx.amount == 999.0) {
+              await (update(transactions)..where((t) => t.id.equals(tx.id))).write(
+                const TransactionsCompanion(
+                  amount: Value(991.0),
+                  roundOffAmount: Value(9.0),
+                ),
+              );
+            } else {
+              final remainder = (tx.amount * 100).round() % 1000;
+              final correctRoundOffCents = remainder > 0 ? (1000 - remainder) : 0;
+              final correctRoundOff = correctRoundOffCents / 100.0;
+              if ((tx.roundOffAmount - correctRoundOff).abs() > 0.001) {
+                await (update(transactions)..where((t) => t.id.equals(tx.id))).write(
+                  TransactionsCompanion(
+                    roundOffAmount: Value(correctRoundOff),
+                  ),
+                );
+              }
+            }
+          }
+        }
       },
     );
   }
@@ -472,10 +526,10 @@ class AppDatabase extends _$AppDatabase {
         accountId: hdfcId,
         categoryId: foodCatId,
         type: 'expense',
-        amount: 280.0,
+        amount: 275.0,
         description: 'Starbucks Coffee',
         date: now.subtract(const Duration(hours: 3)),
-        roundOffAmount: const Value(20.0), // Rounded to ₹300, wallet gets ₹20
+        roundOffAmount: const Value(5.0), // Rounded to ₹280, wallet gets ₹5
       ),
     );
 
@@ -501,7 +555,7 @@ class AppDatabase extends _$AppDatabase {
         amount: 435.0,
         description: 'Blinkit Groceries',
         date: now.subtract(const Duration(days: 2, hours: 4)),
-        roundOffAmount: const Value(15.0), // Rounded to ₹450, wallet gets ₹15
+        roundOffAmount: const Value(5.0), // Rounded to ₹440, wallet gets ₹5
       ),
     );
 
@@ -524,10 +578,10 @@ class AppDatabase extends _$AppDatabase {
         accountId: hdfcId,
         categoryId: foodCatId,
         type: 'expense',
-        amount: 580.0,
+        amount: 582.0,
         description: 'Swiggy Gourmet Dinner',
         date: now.subtract(const Duration(days: 3, hours: 6)),
-        roundOffAmount: const Value(20.0), // Rounded to ₹600, wallet gets ₹20
+        roundOffAmount: const Value(8.0), // Rounded to ₹590, wallet gets ₹8
       ),
     );
 
@@ -563,10 +617,10 @@ class AppDatabase extends _$AppDatabase {
         accountId: hdfcId,
         categoryId: billsCatId,
         type: 'expense',
-        amount: 999.0,
+        amount: 991.0,
         description: 'Jio Fiber Broadband Bill',
         date: now.subtract(const Duration(days: 8)),
-        roundOffAmount: const Value(1.0), // Rounded to ₹1000, wallet gets ₹1
+        roundOffAmount: const Value(9.0), // Rounded to ₹1000, wallet gets ₹9
       ),
     );
 
@@ -576,10 +630,10 @@ class AppDatabase extends _$AppDatabase {
         accountId: hdfcId,
         categoryId: shoppingCatId,
         type: 'expense',
-        amount: 2190.0,
+        amount: 2194.0,
         description: 'Zara Weekend Shopping',
         date: now.subtract(const Duration(days: 10)),
-        roundOffAmount: const Value(10.0), // Rounded to ₹2200, wallet gets ₹10
+        roundOffAmount: const Value(6.0), // Rounded to ₹2200, wallet gets ₹6
       ),
     );
 
@@ -589,10 +643,10 @@ class AppDatabase extends _$AppDatabase {
         accountId: paytmId,
         categoryId: subsCatId,
         type: 'expense',
-        amount: 760.0,
+        amount: 765.0,
         description: 'BookMyShow IMAX Tickets',
         date: now.subtract(const Duration(days: 12)),
-        roundOffAmount: const Value(40.0), // Rounded to ₹800, wallet gets ₹40
+        roundOffAmount: const Value(5.0), // Rounded to ₹770, wallet gets ₹5
       ),
     );
   }
